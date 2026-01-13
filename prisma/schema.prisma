@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Institution settings
+model Settings {
+  id                String   @id @default(cuid())
+  institutionName   String   @default("Queue Management System")
+  logo              String?
+  language          String   @default("en")
+  timezone          String   @default("UTC")
+  callSoundUrl      String?
+  displayBgUrl      String?
+  displayTheme      String   @default("default")
+  showLogo          Boolean  @default(true)
+  showAds           Boolean  @default(false)
+  adContent         String?
+  transitionEffect  String?
+  fontSize          String?
+  fontFamily        String?
+  autoRefresh       Boolean  @default(true)
+  refreshInterval   Int      @default(5)
+  autoResetCounters Boolean  @default(false)
+  resetTime         String   @default("00:00")
+  enableAuditLog    Boolean  @default(true)
+  dataRetentionDays Int      @default(90)
+  maintenanceMode   Boolean  @default(false)
+  allowKioskAccess  Boolean  @default(true)
+  sessionTimeout    Int      @default(30)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Services that customers can select
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   // A, B, C, etc.
+  color       String   @default("#3B82F6")
+  description String?
+  nameAr      String?  // Arabic translation
+  nameUr      String?  // Urdu translation
+  nameBn      String?  // Bengali translation
+  descriptionAr String? // Arabic description
+  descriptionUr String? // Urdu description
+  descriptionBn String? // Bengali description
+  isActive    Boolean  @default(true)
+  currentNumber Int    @default(0)
+  printerId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  printer     Printer? @relation(fields: [printerId], references: [id])
+  staff       StaffService[]
+  tickets     Ticket[]
+}
+
+// Staff members
+model Staff {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // hashed
+  name      String
+  email     String   @unique
+  role      Role     @default(STAFF)
+  counterNumber Int?  // Counter number assigned to staff
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services  StaffService[]
+  tickets   Ticket[]
+}
+
+// Many-to-many relationship between staff and services
+model StaffService {
+  id        String   @id @default(cuid())
+  staffId   String
+  serviceId String
+  createdAt DateTime @default(now())
+
+  staff     Staff   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, serviceId])
+}
+
+// Printer configuration
+model Printer {
+  id               String   @id @default(cuid())
+  name             String
+  type             PrinterType @default(USB)
+  address          String?  // IP address for network printers
+  port             Int?     // Port for network printers
+  paperWidth       Int      @default(80) // mm
+  isActive         Boolean  @default(true)
+  testPrintResult  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  services         Service[]
+}
+
+// Tickets issued to customers
+model Ticket {
+  id           String     @id @default(cuid())
+  ticketNumber String
+  serviceId    String
+  staffId      String?
+  status       TicketStatus @default(WAITING)
+  issuedAt     DateTime   @default(now())
+  calledAt     DateTime?
+  servedAt     DateTime?
+  waitingTime  Int?       // in minutes
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  service      Service   @relation(fields: [serviceId], references: [id])
+  staff        Staff?    @relation(fields: [staffId], references: [id])
+}
+
+// Audit log for admin actions
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String   // service, staff, printer, etc.
+  entityId  String
+  details   String?  // JSON string of changes
+  userId    String   // who performed the action
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  SUPERVISOR
+  STAFF
+  KIOSK
+}
+
+enum PrinterType {
+  USB
+  NETWORK
+}
+
+enum TicketStatus {
+  WAITING
+  CALLED
+  SERVED
+  SKIPPED
+  CANCELLED
+}
