@@ -14,22 +14,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Z.ai Team" }],
+  title: "Triple Queue Management System",
+  description: "A comprehensive system for managing queues across three different service points efficiently.",
+  keywords: ["queue management", "service points", "efficiency", "customer service", "real-time tracking"],
+  authors: [{ name: "Triple Point Est." }],
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "Triple Queue Management System",
+    description: "A comprehensive system for managing queues across three different service points efficiently.",
+    url: "https://triplepointsa.com",
+    siteName: "Triple Point Est.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-  },
+    title: "Triple Queue Management System",
+    description: "A comprehensive system for managing queues across three different service points efficiently.",
+  }
 };
 
 export default function RootLayout({
